@@ -299,9 +299,11 @@ public class CalendarFragment extends Fragment {
             informationCalendars.clear();
         }
         if (language.equals(DashwoodCalendar.ENGLISH_LANGUAGE)) {
+            fragmentCalendarBinding.recItemCalendar.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
             createCalendarEnglish();
             return;
         }
+        fragmentCalendarBinding.recItemCalendar.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         createCalendarPersian();
 
     }
