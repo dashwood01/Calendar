@@ -81,7 +81,7 @@ DashwoodCalendar dashwoodCalendar = new DashwoodCalendar(this,
 
 Always remember that the **init()** function must be the last function called.
 
-You can see simple code [here](https://github.com/dashwood01/dashwood-calendar/blob/master/app/src/main/java/com/dashwood/calendar/MainActivity.java)
+You can see simple code [here](https://github.com/dashwood01/Calendar/tree/master/app/src/main/java/com/dashwood/calendar)
 
 
 
