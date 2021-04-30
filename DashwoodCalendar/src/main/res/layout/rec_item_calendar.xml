@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/vgRootCalendar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="2sp">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:id="@+id/cardView"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="10sp">
+
+        <Button
+            android:id="@+id/btnDay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/background_button_trans"
+            android:textColor="@color/black"
+            android:textSize="@dimen/text_size_button_day" />
+    </androidx.cardview.widget.CardView>
+</LinearLayout>

@@ -1,0 +1,3 @@
+include ':DashwoodCalendar'
+include ':app'
+rootProject.name = "Calendar"

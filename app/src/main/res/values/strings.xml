@@ -1,0 +1,64 @@
+<resources>
+    <string name="app_name">Dashwood Calendar</string>
+    <string name="saturday">شنبه</string>
+    <string name="sunday">یک شنبه</string>
+    <string name="monday">دوشنبه</string>
+    <string name="tuesday">سه شنبه</string>
+    <string name="wednesday">چهارشنبه</string>
+    <string name="thursday">پنج شنبه</string>
+    <string name="friday">جمعه</string>
+    <string name="full_date_format">%s-%s-%s</string>
+    <string name="btn_text_today">امروز</string>
+    <string name="btn_text_today_english">Today</string>
+
+    <array name="week_name_persian">
+        <item>شنبه</item>
+        <item>یک شنبه</item>
+        <item>دوشنبه</item>
+        <item>سه شنبه</item>
+        <item>چهارشنبه</item>
+        <item>پنج شنبه</item>
+        <item>جمعه</item>
+    </array>
+
+    <array name="week_name_english">
+        <item>Sun</item>
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+    </array>
+
+    <array name="month_name_persian">
+        <item>فروردین</item>
+        <item>اردیبهشت</item>
+        <item>خرداد</item>
+        <item>تیر</item>
+        <item>مرداد</item>
+        <item>شهریور</item>
+        <item>مهر</item>
+        <item>آبان</item>
+        <item>آذر</item>
+        <item>دی</item>
+        <item>بهمن</item>
+        <item>اسفند</item>
+    </array>
+
+    <array name="month_name_english">
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>May</item>
+        <item>June</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>November</item>
+        <item>December</item>
+    </array>
+
+</resources>
