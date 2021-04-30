@@ -21,7 +21,7 @@ allprojects {
 	
   
   dependencies {
-		  implementation 'com.github.dashwood01:dashwood-calendar:1.0.0'
+		   implementation 'com.github.dashwood01:Calendar:1.0.2'
 	}
   ```
 
