@@ -1,3 +1,4 @@
+[![](https://jitpack.io/v/dashwood01/Calendar.svg)](https://jitpack.io/#dashwood01/Calendar)
 
 # dashwood-calendar
 Custom calendar for Persian and English calendars
