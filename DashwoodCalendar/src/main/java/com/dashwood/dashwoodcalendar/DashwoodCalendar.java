@@ -391,9 +391,9 @@ public class DashwoodCalendar {
     private void setGoToMonthSelected(int month) {
         int counter = 0;
         for (CalendarFragment calendarFragment : calendarFragments) {
-            if (calendarFragment.getFragmentCalendarBinding() != null) {
-                calendarFragment.getFragmentCalendarBinding().recItemCalendar.setVisibility(View.VISIBLE);
-                calendarFragment.getFragmentCalendarBinding().recItemMonthAndYear.setVisibility(View.GONE);
+            if (calendarFragment.getBinding() != null) {
+                calendarFragment.getBinding().recItemCalendar.setVisibility(View.VISIBLE);
+                calendarFragment.getBinding().recItemMonthAndYear.setVisibility(View.GONE);
             }
             if (calendarFragment.getYear() != currentYear) {
                 counter++;
@@ -411,9 +411,9 @@ public class DashwoodCalendar {
         int counter = 0;
         for (CalendarFragment calendarFragment : calendarFragments) {
             if (year == calendarFragment.getYear()) {
-                if (calendarFragment.getFragmentCalendarBinding() != null) {
-                    calendarFragment.getFragmentCalendarBinding().recItemCalendar.setVisibility(View.VISIBLE);
-                    calendarFragment.getFragmentCalendarBinding().recItemMonthAndYear.setVisibility(View.GONE);
+                if (calendarFragment.getBinding() != null) {
+                    calendarFragment.getBinding().recItemCalendar.setVisibility(View.VISIBLE);
+                    calendarFragment.getBinding().recItemMonthAndYear.setVisibility(View.GONE);
                 }
                 currentYear = year;
                 viewPager.setCurrentItem(counter, false);
@@ -439,9 +439,9 @@ public class DashwoodCalendar {
                 continue;
             }
             if (currentMonth == calendarFragment.getMonth()) {
-                if (calendarFragment.getFragmentCalendarBinding() != null) {
-                    calendarFragment.getFragmentCalendarBinding().recItemCalendar.setVisibility(View.VISIBLE);
-                    calendarFragment.getFragmentCalendarBinding().recItemMonthAndYear.setVisibility(View.GONE);
+                if (calendarFragment.getBinding() != null) {
+                    calendarFragment.getBinding().recItemCalendar.setVisibility(View.VISIBLE);
+                    calendarFragment.getBinding().recItemMonthAndYear.setVisibility(View.GONE);
                 }
                 viewPager.setCurrentItem(counter, false);
                 return;

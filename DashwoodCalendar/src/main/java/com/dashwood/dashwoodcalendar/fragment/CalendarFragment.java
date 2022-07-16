@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,7 +37,7 @@ import ir.huri.jcal.JalaliCalendar;
 
 
 public class CalendarFragment extends Fragment {
-    private FragmentCalendarBinding fragmentCalendarBinding;
+    private FragmentCalendarBinding binding;
     private int year, month, day;
     private String language;
     private int backgroundNowDay, backgroundWeekEndDay, backgroundEnableDay, backgroundDisableDay, backgroundWeekName,
@@ -207,8 +206,8 @@ public class CalendarFragment extends Fragment {
         return year;
     }
 
-    public FragmentCalendarBinding getFragmentCalendarBinding() {
-        return fragmentCalendarBinding;
+    public FragmentCalendarBinding getBinding() {
+        return binding;
     }
 
     public CalendarFragment setTextColorMonthAndYear(int textColorMonthAndYear) {
@@ -260,8 +259,8 @@ public class CalendarFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        fragmentCalendarBinding = FragmentCalendarBinding.inflate(inflater, container, false);
-        return fragmentCalendarBinding.getRoot();
+        binding = FragmentCalendarBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
@@ -274,8 +273,8 @@ public class CalendarFragment extends Fragment {
 
     private void setView() {
         adapterRecItemCalendar = new AdapterRecItemCalendar(requireActivity(), language);
-        fragmentCalendarBinding.recItemCalendar.setLayoutManager(new GridLayoutManager(requireContext(), 7));
-        fragmentCalendarBinding.recItemCalendar.setAdapter(adapterRecItemCalendar);
+        binding.recItemCalendar.setLayoutManager(new GridLayoutManager(requireContext(), 7));
+        binding.recItemCalendar.setAdapter(adapterRecItemCalendar);
         adapterRecItemCalendar.setOnClickCalendarListener(onClickCalendarListener);
         adapterRecItemCalendar.setDayWidth(dayWidth);
         adapterRecItemCalendar.setDayHeight(dayHeight);
@@ -299,57 +298,57 @@ public class CalendarFragment extends Fragment {
             informationCalendars.clear();
         }
         if (language.equals(DashwoodCalendar.ENGLISH_LANGUAGE)) {
-            fragmentCalendarBinding.recItemCalendar.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+            binding.recItemCalendar.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
             createCalendarEnglish();
             return;
         }
-        fragmentCalendarBinding.recItemCalendar.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+        binding.recItemCalendar.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         createCalendarPersian();
 
     }
 
     private void setViewBackground() {
         if (backgroundBtnMonth != 0) {
-            fragmentCalendarBinding.btnMonth.setBackground(ContextCompat.getDrawable(requireContext(), backgroundBtnMonth));
+            binding.btnMonth.setBackground(ContextCompat.getDrawable(requireContext(), backgroundBtnMonth));
         }
         if (backgroundBtnYear != 0) {
-            fragmentCalendarBinding.btnYear.setBackground(ContextCompat.getDrawable(requireContext(), backgroundBtnYear));
+            binding.btnYear.setBackground(ContextCompat.getDrawable(requireContext(), backgroundBtnYear));
         }
         if (backgroundBtnToday != 0) {
-            fragmentCalendarBinding.btnToday.setBackground(ContextCompat.getDrawable(requireContext(), backgroundBtnToday));
+            binding.btnToday.setBackground(ContextCompat.getDrawable(requireContext(), backgroundBtnToday));
         }
         if (backgroundColorRootOptionCalendar != 0) {
-            fragmentCalendarBinding.rootLayoutOptionCalendar.setBackgroundColor(ContextCompat.getColor(requireContext(), backgroundColorRootOptionCalendar));
+            binding.rootLayoutOptionCalendar.setBackgroundColor(ContextCompat.getColor(requireContext(), backgroundColorRootOptionCalendar));
         }
         if (textColorBtnMonth != 0) {
-            fragmentCalendarBinding.btnMonth.setTextColor(ContextCompat.getColor(requireContext(), textColorBtnMonth));
+            binding.btnMonth.setTextColor(ContextCompat.getColor(requireContext(), textColorBtnMonth));
         }
         if (textColorBtnYear != 0) {
-            fragmentCalendarBinding.btnYear.setTextColor(ContextCompat.getColor(requireContext(), textColorBtnYear));
+            binding.btnYear.setTextColor(ContextCompat.getColor(requireContext(), textColorBtnYear));
         }
         if (textColorBtnToday != 0) {
-            fragmentCalendarBinding.btnToday.setTextColor(ContextCompat.getColor(requireContext(), textColorBtnToday));
+            binding.btnToday.setTextColor(ContextCompat.getColor(requireContext(), textColorBtnToday));
         }
     }
 
     private void setAction() {
-        fragmentCalendarBinding.btnMonth.setOnClickListener(v -> {
+        binding.btnMonth.setOnClickListener(v -> {
             onViewpagerDisableEnableScrolling.onViewpagerDisableEnableScrolling(false);
             createRecyclerViewMonth();
         });
-        fragmentCalendarBinding.btnYear.setOnClickListener(v -> {
+        binding.btnYear.setOnClickListener(v -> {
             onViewpagerDisableEnableScrolling.onViewpagerDisableEnableScrolling(false);
             createRecyclerViewYear();
         });
-        fragmentCalendarBinding.btnToday.setOnClickListener(v -> {
+        binding.btnToday.setOnClickListener(v -> {
             onMonthAndYearClickListener.setOnYearOrMonthClickListener(0, "", false);
         });
     }
 
     private void createCalendarPersian() {
         JalaliCalendar defaultJalali = DateConverter.getPersianDateJalali(year, month, day);
-        fragmentCalendarBinding.btnYear.setText(String.valueOf(year));
-        fragmentCalendarBinding.btnMonth.setText(defaultJalali.getMonthString());
+        binding.btnYear.setText(String.valueOf(year));
+        binding.btnMonth.setText(defaultJalali.getMonthString());
         String[] weekNameArray = getResources().getStringArray(R.array.week_name_persian);
         int monthLen = defaultJalali.getMonthLength() + defaultJalali.getDayOfWeek() + weekNameArray.length;
         for (int i = 0; i < monthLen; i++) {
@@ -390,17 +389,17 @@ public class CalendarFragment extends Fragment {
             informationCalendars.add(informationCalendar);
         }
         adapterRecItemCalendar.sendItems(informationCalendars);
-        fragmentCalendarBinding.recItemCalendar.scheduleLayoutAnimation();
+        binding.recItemCalendar.scheduleLayoutAnimation();
     }
 
     private void createCalendarEnglish() {
-        fragmentCalendarBinding.btnToday.setText(getString(R.string.btn_text_today_english));
-        fragmentCalendarBinding.btnToday.setTypeface(Typeface.DEFAULT_BOLD);
-        fragmentCalendarBinding.btnYear.setTypeface(Typeface.DEFAULT_BOLD);
-        fragmentCalendarBinding.btnMonth.setTypeface(Typeface.DEFAULT_BOLD);
+        binding.btnToday.setText(getString(R.string.btn_text_today_english));
+        binding.btnToday.setTypeface(Typeface.DEFAULT_BOLD);
+        binding.btnYear.setTypeface(Typeface.DEFAULT_BOLD);
+        binding.btnMonth.setTypeface(Typeface.DEFAULT_BOLD);
         Calendar calendar = new GregorianCalendar(year, month, day);
-        fragmentCalendarBinding.btnYear.setText(String.valueOf(year));
-        fragmentCalendarBinding.btnMonth.setText(simpleFormatMonth.format(calendar.getTime()));
+        binding.btnYear.setText(String.valueOf(year));
+        binding.btnMonth.setText(simpleFormatMonth.format(calendar.getTime()));
         String[] weekNameArray = getResources().getStringArray(R.array.week_name_english);
         for (String s : weekNameArray) {
             InformationCalendar informationCalendar = new InformationCalendar();
@@ -435,7 +434,7 @@ public class CalendarFragment extends Fragment {
             informationCalendars.add(informationCalendar);
         }
         adapterRecItemCalendar.sendItems(informationCalendars);
-        fragmentCalendarBinding.recItemCalendar.scheduleLayoutAnimation();
+        binding.recItemCalendar.scheduleLayoutAnimation();
     }
 
     private boolean checkDisableDay(String date) {
@@ -456,15 +455,15 @@ public class CalendarFragment extends Fragment {
         adapterRecItemMonthNameAndYear.setTextSizeMonthAndYear(textSizeMonthAndYear);
         adapterRecItemMonthNameAndYear.setBackgroundMonthAndYear(backgroundMonthAndYear);
         adapterRecItemMonthNameAndYear.setRadiusMonthAndYear(radiusMonthAndYear);
-        fragmentCalendarBinding.recItemMonthAndYear.setLayoutManager(new GridLayoutManager(requireContext(), 3));
-        fragmentCalendarBinding.recItemMonthAndYear.setAdapter(adapterRecItemMonthNameAndYear);
-        fragmentCalendarBinding.recItemMonthAndYear.setVisibility(View.VISIBLE);
+        binding.recItemMonthAndYear.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+        binding.recItemMonthAndYear.setAdapter(adapterRecItemMonthNameAndYear);
+        binding.recItemMonthAndYear.setVisibility(View.VISIBLE);
         if (language.equals(DashwoodCalendar.ENGLISH_LANGUAGE)) {
-            fragmentCalendarBinding.recItemMonthAndYear.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+            binding.recItemMonthAndYear.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         } else {
-            fragmentCalendarBinding.recItemMonthAndYear.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+            binding.recItemMonthAndYear.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         }
-        fragmentCalendarBinding.recItemCalendar.setVisibility(View.GONE);
+        binding.recItemCalendar.setVisibility(View.GONE);
         adapterRecItemMonthNameAndYear.setOnMonthAndYearClickListener(onMonthAndYearClickListener);
         if (language.equals(DashwoodCalendar.ENGLISH_LANGUAGE)) {
             createMonthEnglish();
@@ -476,38 +475,38 @@ public class CalendarFragment extends Fragment {
     private void createMonthPersian() {
         ArrayList<String> monthName = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.month_name_persian)));
         adapterRecItemMonthNameAndYear.sendItems(monthName);
-        fragmentCalendarBinding.recItemMonthAndYear.scheduleLayoutAnimation();
+        binding.recItemMonthAndYear.scheduleLayoutAnimation();
     }
 
     private void createMonthEnglish() {
         ArrayList<String> monthName = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.month_name_english)));
         adapterRecItemMonthNameAndYear.sendItems(monthName);
-        fragmentCalendarBinding.recItemMonthAndYear.scheduleLayoutAnimation();
+        binding.recItemMonthAndYear.scheduleLayoutAnimation();
     }
 
     private void createRecyclerViewYear() {
         adapterRecItemMonthNameAndYear = new AdapterRecItemMonthNameAndYear(requireContext(), false, language);
-        fragmentCalendarBinding.recItemMonthAndYear.setLayoutManager(new GridLayoutManager(requireContext(), 3));
-        fragmentCalendarBinding.recItemMonthAndYear.setAdapter(adapterRecItemMonthNameAndYear);
-        fragmentCalendarBinding.recItemMonthAndYear.setVisibility(View.VISIBLE);
+        binding.recItemMonthAndYear.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+        binding.recItemMonthAndYear.setAdapter(adapterRecItemMonthNameAndYear);
+        binding.recItemMonthAndYear.setVisibility(View.VISIBLE);
         if (language.equals(DashwoodCalendar.PERSIAN_LANGUAGE)) {
-            fragmentCalendarBinding.recItemMonthAndYear.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+            binding.recItemMonthAndYear.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         } else {
-            fragmentCalendarBinding.recItemMonthAndYear.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+            binding.recItemMonthAndYear.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         }
-        fragmentCalendarBinding.recItemCalendar.setVisibility(View.GONE);
+        binding.recItemCalendar.setVisibility(View.GONE);
         adapterRecItemMonthNameAndYear.setOnMonthAndYearClickListener(onMonthAndYearClickListener);
         ArrayList<String> years = new ArrayList<>();
         for (int i = minYear; i <= maxYear; i++) {
             years.add(String.valueOf(i));
         }
         adapterRecItemMonthNameAndYear.sendItems(years);
-        fragmentCalendarBinding.recItemCalendar.scheduleLayoutAnimation();
+        binding.recItemCalendar.scheduleLayoutAnimation();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        fragmentCalendarBinding = null;
+        binding = null;
     }
 }
