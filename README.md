@@ -22,7 +22,7 @@ allprojects {
 	
   
   dependencies {
-		   implementation 'com.github.dashwood01:Calendar:1.0.2'
+		   implementation 'com.github.dashwood01:Calendar:1.1.1'
 	}
   ```
 
@@ -32,37 +32,37 @@ Add **ViewPager2** in layout
 
 ```xml
  <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/viewPager"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    android:id="@+id/viewPager"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
 ```
 
 #### And then init in activity
 
 ```java
 DashwoodCalendar dashwoodCalendar = new DashwoodCalendar(this,
-                    viewPager, 1300, 1500, DashwoodCalendar.PERSIAN_LANGUAGE);
-            dashwoodCalendar.setOnClickCalendarListener((day, month, year, monthName, dayOfWeek, dayOfWeekNumber, fullDateWithMonthString, fullDate, gregorianDate) -> {
-                Toast.makeText(this, "Day : " + day + "\nMonth : " + month + "\nyear : " + year + "\nmonthName : " + monthName + "\nday of week : " + dayOfWeek + "\nday of week number : " + dayOfWeekNumber +
-                        "\nfull date with month string : " + fullDateWithMonthString + "\nfull date : " + fullDate + "\ngregorian date : " + gregorianDate, Toast.LENGTH_LONG).show();
-            });
-	    //You must call init after all changes
-            dashwoodCalendar.init();
+        viewPager, 1300, 1500, DashwoodCalendar.PERSIAN_LANGUAGE);
+        dashwoodCalendar.setOnClickCalendarListener((day, month, year, monthName, dayOfWeek, dayOfWeekNumber, fullDateWithMonthString, fullDate, gregorianDate) -> {
+        Toast.makeText(this, "Day : " + day + "\nMonth : " + month + "\nyear : " + year + "\nmonthName : " + monthName + "\nday of week : " + dayOfWeek + "\nday of week number : " + dayOfWeekNumber +
+        "\nfull date with month string : " + fullDateWithMonthString + "\nfull date : " + fullDate + "\ngregorian date : " + gregorianDate, Toast.LENGTH_LONG).show();
+        });
+        //You must call init after all changes
+        dashwoodCalendar.init();
 ```
 
 ### If you want disable some days just set information
 
 ```java
 ArrayList<InformationDisableDay> informationDisableDays = new ArrayList<>();
-	//The date must be Gregorian
+        //The date must be Gregorian
         String[] dates = {"2021-05-17","2021-05-18","2021-05-19"};
         for (String date : dates){
-            InformationDisableDay informationDisableDay = new InformationDisableDay();
-            informationDisableDay.setDate(date);
-            informationDisableDays.add(informationDisableDay);
+        InformationDisableDay informationDisableDay = new InformationDisableDay();
+        informationDisableDay.setDate(date);
+        informationDisableDays.add(informationDisableDay);
         }
         dashwoodCalendar.setInformationDisableDays(informationDisableDays);
-	dashwoodCalendar.init();
+        dashwoodCalendar.init();
 ```
 
 ### If you want it to always be the maxYear of the current year
@@ -72,8 +72,8 @@ ArrayList<InformationDisableDay> informationDisableDays = new ArrayList<>();
 // DashwoodCalendar.THIS_YEAR_PRESIAN
 
 DashwoodCalendar dashwoodCalendar = new DashwoodCalendar(this,
-                    viewPager, 1300, DashwoodCalendar.THIS_YEAR_PERSIAN, DashwoodCalendar.PERSIAN_LANGUAGE);
-		 dashwoodCalendar.init();
+        viewPager, 1300, DashwoodCalendar.THIS_YEAR_PERSIAN, DashwoodCalendar.PERSIAN_LANGUAGE);
+        dashwoodCalendar.init();
 ```
 
 
