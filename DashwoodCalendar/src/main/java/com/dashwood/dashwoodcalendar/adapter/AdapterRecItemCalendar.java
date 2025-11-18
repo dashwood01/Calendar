@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -142,7 +143,7 @@ public class AdapterRecItemCalendar extends RecyclerView.Adapter<AdapterRecItemC
             holder.btnDay.setEnabled(false);
             holder.btnDay.setBackground(null);
             holder.btnDay.setText(informationCalendar.getDay());
-            holder.cardView.setBackground(null);
+         //   holder.cardView.setBackground(null);
             if (position <= 6) {
                 if (textWeekNameColor != 0) {
                     holder.btnDay.setTextColor(ContextCompat.getColor(context, textWeekNameColor));
@@ -216,9 +217,9 @@ public class AdapterRecItemCalendar extends RecyclerView.Adapter<AdapterRecItemC
             layoutParams.gravity = Gravity.END;
             holder.btnDay.setLayoutParams(layoutParams);
         }
-        if (radius != 0) {
+       /* if (radius != 0) {
             holder.cardView.setRadius(radius);
-        }
+        }*/
 
     }
 
@@ -240,13 +241,13 @@ public class AdapterRecItemCalendar extends RecyclerView.Adapter<AdapterRecItemC
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        private Button btnDay;
-        private CardView cardView;
+        private TextView btnDay;
+       // private CardView cardView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             btnDay = itemView.findViewById(R.id.btnDay);
-            cardView = itemView.findViewById(R.id.cardView);
+          //  cardView = itemView.findViewById(R.id.cardView);
         }
     }
 }

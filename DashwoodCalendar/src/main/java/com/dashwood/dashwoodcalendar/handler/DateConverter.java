@@ -56,7 +56,6 @@ public class DateConverter {
                 + stringDay;
     }
 
-
     public static String persianDateToGregorianDateFirstReturnYear(String persianDate) {
         try {
             SimpleDateFormat format = new SimpleDateFormat(
@@ -219,5 +218,73 @@ public class DateConverter {
         return new JalaliCalendar(year, month, day);
     }
 
+    public static String persianDateToGregorianDateWithSlash(String persianDate) {
+        try {
+            SimpleDateFormat format = new SimpleDateFormat(
+                    "yyyy/MM/dd", Locale.ROOT);
+            Date date = format.parse(persianDate);
+            if (date == null) {
+                return "";
+            }
+            String persianFormatDate = format.format(date);
+            String[] persianDates = persianFormatDate.split("/");
+            JalaliCalendar jalaliCalendar = new JalaliCalendar(Integer.parseInt(persianDates[0]),
+                    Integer.parseInt(persianDates[1]), Integer.parseInt(persianDates[2]));
+            GregorianCalendar gregorianCalendar = jalaliCalendar.toGregorian();
+            int day = gregorianCalendar.get(Calendar.DAY_OF_MONTH);
+            String stringDay;
+            if (day < 10) {
+                stringDay = "0" + day;
+            } else {
+                stringDay = String.valueOf(day);
+            }
+            String stringMonth;
+            int month = gregorianCalendar.get(Calendar.MONTH) + 1;
+            if (month < 10) {
+                stringMonth = "0" + month;
+            } else {
+                stringMonth = String.valueOf(month);
+            }
+            return gregorianCalendar.get(Calendar.YEAR) + "/" + stringMonth + "/" + stringDay;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    public static String gregorianToPersianWithSlash(String gregorianDateValue) {
+        String[] dates = gregorianDateValue.split(" ");
+        gregorianDateValue = dates[0];
+        try {
+            SimpleDateFormat format = new SimpleDateFormat(
+                    "yyyy/MM/dd", Locale.ROOT);
+            Date date = format.parse(gregorianDateValue);
+            if (date == null) {
+                return "";
+            }
+            String stringFormatData = format.format(date).replaceAll("/", "-");
+            String[] gregorianDate = stringFormatData.split("-");
+            JalaliCalendar jalaliCalendar = new JalaliCalendar(new GregorianCalendar(Integer.parseInt(gregorianDate[0]),
+                    Integer.parseInt(gregorianDate[1]) - 1, Integer.parseInt(gregorianDate[2])));
+            int day = jalaliCalendar.getDay();
+            String stringDay;
+            if (day < 10) {
+                stringDay = "0" + day;
+            } else {
+                stringDay = String.valueOf(day);
+            }
+            int month = jalaliCalendar.getMonth();
+            String stringMonth;
+            if (month < 10) {
+                stringMonth = "0" + month;
+            } else {
+                stringMonth = String.valueOf(month);
+            }
+            return jalaliCalendar.getYear() + "/" + stringMonth + "/" + stringDay;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
 
 }
