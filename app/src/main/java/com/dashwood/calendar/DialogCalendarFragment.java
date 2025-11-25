@@ -9,14 +9,9 @@ import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.compose.ui.platform.ComposeView;
 import androidx.fragment.app.DialogFragment;
 
 import com.dashwood.calendar.databinding.FragmentDialogCalendarBinding;
-import com.dashwood.dashwoodcalendar.DashwoodCalendarKt;
-import com.dashwood.dashwoodcalendar.handler.CalendarLanguage;
-import com.dashwood.dashwoodcalendar.handler.DashwoodCalendarStyle;
-import com.dashwood.dashwoodcalendar.handler.DashwoodYear;
 
 public class DialogCalendarFragment extends DialogFragment {
 

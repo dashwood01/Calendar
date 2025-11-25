@@ -1,7 +1,7 @@
-package com.dashwood.dashwoodcalendar.inf
+package com.dashwood.dashwoodcalendar.model
 import kotlinx.datetime.LocalDate
 
-data class DashwoodDay(
+data class CalendarModel(
     val day: Int,                 // 1..31
     val month: Int,               // 1..12
     val year: Int,

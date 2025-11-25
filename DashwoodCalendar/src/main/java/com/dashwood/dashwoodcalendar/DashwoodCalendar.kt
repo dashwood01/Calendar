@@ -4,26 +4,32 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalLayoutDirection
 import com.dashwood.dashwoodcalendar.handler.CalendarLanguage
-import com.dashwood.dashwoodcalendar.handler.DashwoodCalendarState
-import com.dashwood.dashwoodcalendar.handler.DashwoodCalendarStyle
+import com.dashwood.dashwoodcalendar.state.DashwoodCalendarState
+import com.dashwood.dashwoodcalendar.theme.DashwoodCalendarStyle
+import com.dashwood.dashwoodcalendar.handler.DateConverter
 import com.dashwood.dashwoodcalendar.handler.JalaliUtils
-import com.dashwood.dashwoodcalendar.inf.DashwoodDay
+import com.dashwood.dashwoodcalendar.model.CalendarModel
+import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
@@ -32,15 +38,43 @@ import kotlinx.datetime.isoDayNumber
 @Composable
 fun DashwoodCalendar(
     state: DashwoodCalendarState,
-    disabledDays: List<LocalDate> = emptyList(),      // list of disabled GREGORIAN dates
-    onDayClick: (DashwoodDay) -> Unit = {},
+    disabledDays: List<LocalDate> = emptyList(),
+    onDayClick: (CalendarModel) -> Unit = {},
     style: DashwoodCalendarStyle = DashwoodCalendarStyle.default(),
     modifier: Modifier = Modifier,
     rtl: Boolean = true
 ) {
-    CompositionLocalProvider(
-        LocalLayoutDirection provides if (rtl) LayoutDirection.Rtl else LayoutDirection.Ltr
-    ) {
+    val layoutDirection = if (rtl) LayoutDirection.Rtl else LayoutDirection.Ltr
+
+    val minYear = state.minYear
+    val maxYear = state.maxYear
+    val totalMonths = (maxYear - minYear + 1) * 12
+
+    val initialPage = remember {
+        val clampedYear = state.currentYear.coerceIn(minYear, maxYear)
+        val month = state.currentMonth.coerceIn(1, 12)
+        (clampedYear - minYear) * 12 + (month - 1)
+    }
+
+    val pagerState = rememberPagerState(
+        initialPage = initialPage,
+        pageCount = { totalMonths }
+    )
+
+    val scope = rememberCoroutineScope()
+
+    // keep state.currentYear/currentMonth in sync with pager
+    LaunchedEffect(pagerState.currentPage) {
+        val idx = pagerState.currentPage
+        val year = minYear + idx / 12
+        val month = 1 + idx % 12
+        state.setMonthYear(year, month)
+    }
+
+    var showYearPicker by remember { mutableStateOf(false) }
+    var showMonthPicker by remember { mutableStateOf(false) }
+
+    CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
         Surface(
             modifier = modifier,
             shape = RoundedCornerShape(style.dayRadius),
@@ -51,84 +85,154 @@ fun DashwoodCalendar(
                     .background(style.backgroundTopBar)
                     .padding(8.dp)
             ) {
-                CalendarTopBar(state = state, style = style)
-                Spacer(modifier = Modifier.height(8.dp))
-                CalendarWeekNames(style = style, language = state.language)
-                Spacer(modifier = Modifier.height(4.dp))
-                CalendarMonthGrid(
+                CalendarTopBar(
                     state = state,
-                    disabledDays = disabledDays,
                     style = style,
-                    onDayClick = onDayClick
+                    onYearClick = { showYearPicker = true },
+                    onMonthClick = { showMonthPicker = true },
+                    onTodayClick = {
+                        state.goToToday()
+                        val year = state.currentYear
+                        val month = state.currentMonth
+                        val targetPage = (year - minYear) * 12 + (month - 1)
+                        scope.launch {
+                            pagerState.animateScrollToPage(targetPage)
+                        }
+                    }
                 )
+                Spacer(Modifier.height(8.dp))
+                CalendarWeekNames(style = style, language = state.language)
+                Spacer(Modifier.height(4.dp))
+
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxWidth()
+                ) { page ->
+                    val pageYear = minYear + page / 12
+                    val pageMonth = 1 + page % 12
+
+                    CalendarMonthPage(
+                        language = state.language,
+                        year = pageYear,
+                        month = pageMonth,
+                        disabledDays = disabledDays,
+                        style = style,
+                        selectedDate = state.selectedDate,
+                        onSelectDate = { date, dashwoodDay ->
+                            state.onDateSelected(date)
+                            onDayClick(dashwoodDay)
+                        }
+                    )
+                }
             }
+        }
+
+        if (showYearPicker) {
+            YearPickerDialog(
+                currentYear = state.currentYear,
+                minYear = minYear,
+                maxYear = maxYear,
+                style = style,
+                onDismiss = { showYearPicker = false },
+                onYearSelected = { year ->
+                    val month = state.currentMonth
+                    val targetPage = (year - minYear) * 12 + (month - 1)
+                    scope.launch {
+                        pagerState.animateScrollToPage(targetPage)
+                    }
+                    showYearPicker = false
+                }
+            )
+        }
+
+        if (showMonthPicker) {
+            MonthPickerDialog(
+                language = state.language,
+                currentYear = state.currentYear,
+                currentMonth = state.currentMonth,
+                style = style,
+                onDismiss = { showMonthPicker = false },
+                onMonthSelected = { month ->
+                    val year = state.currentYear
+                    val targetPage = (year - minYear) * 12 + (month - 1)
+                    scope.launch {
+                        pagerState.animateScrollToPage(targetPage)
+                    }
+                    showMonthPicker = false
+                }
+            )
         }
     }
 }
 
+/* -------------------- Top bar & week names -------------------- */
+
 @Composable
 private fun CalendarTopBar(
     state: DashwoodCalendarState,
-    style: DashwoodCalendarStyle
+    style: DashwoodCalendarStyle,
+    onYearClick: () -> Unit,
+    onMonthClick: () -> Unit,
+    onTodayClick: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        // Year
+        // Year button
         Box(
             modifier = Modifier
                 .weight(1f)
                 .clip(RoundedCornerShape(style.monthYearRadius))
                 .background(style.backgroundBtnYear)
-                .clickable { /* TODO year picker */ }
+                .clickable { onYearClick() }
                 .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = state.currentYear.toString(),
                 color = style.textColorBtnYear,
-                fontSize = style.textSizeMonthYearList.sp,
+                fontSize = style.textSizeMonthYearListSp.sp,
                 fontWeight = FontWeight.Medium
             )
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(Modifier.width(8.dp))
 
-        // Month
+        // Month button
         Box(
             modifier = Modifier
                 .weight(1.5f)
                 .clip(RoundedCornerShape(style.monthYearRadius))
                 .background(style.backgroundBtnMonth)
-                .clickable { /* TODO month picker */ }
+                .clickable { onMonthClick() }
                 .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = monthName(state.currentYear, state.currentMonth, state.language),
                 color = style.textColorBtnMonth,
-                fontSize = style.textSizeMonthYearList.sp,
+                fontSize = style.textSizeMonthYearListSp.sp,
                 fontWeight = FontWeight.Medium
             )
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(Modifier.width(8.dp))
 
-        // Today
+        // Today button
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(style.monthYearRadius))
                 .background(style.backgroundBtnToday)
-                .clickable { state.goToToday() }
+                .clickable { onTodayClick() }
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = if (state.language == CalendarLanguage.Persian) "امروز" else "Today",
                 color = style.textColorBtnToday,
-                fontSize = style.textSizeMonthYearList.sp,
+                fontSize = style.textSizeMonthYearListSp.sp,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -154,7 +258,7 @@ private fun CalendarWeekNames(
     ) {
         names.forEachIndexed { index, name ->
             val isWeekend = when (language) {
-                CalendarLanguage.Persian -> index == 6 // جمعه
+                CalendarLanguage.Persian -> index == 6  // جمعه
                 CalendarLanguage.Gregorian -> index == 0 || index == 6
             }
             Text(
@@ -162,45 +266,61 @@ private fun CalendarWeekNames(
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
                 color = if (isWeekend) style.textWeekendColor else style.textWeekNameColor,
-                fontSize = style.textSizeWeekName.sp,
+                fontSize = style.textSizeWeekNameSp.sp,
                 fontWeight = FontWeight.SemiBold
             )
         }
     }
 }
 
+/* -------------------- Month page (grid) -------------------- */
+
 @Composable
-private fun CalendarMonthGrid(
-    state: DashwoodCalendarState,
+private fun CalendarMonthPage(
+    language: CalendarLanguage,
+    year: Int,
+    month: Int,
     disabledDays: List<LocalDate>,
     style: DashwoodCalendarStyle,
-    onDayClick: (DashwoodDay) -> Unit
+    selectedDate: LocalDate?,
+    onSelectDate: (LocalDate, CalendarModel) -> Unit
 ) {
-    when (state.language) {
-        CalendarLanguage.Gregorian ->
-            GregorianMonthGrid(state, disabledDays, style, onDayClick)
+    when (language) {
+        CalendarLanguage.Gregorian -> GregorianMonthGrid(
+            year = year,
+            month = month,
+            disabledDays = disabledDays,
+            style = style,
+            selectedDate = selectedDate,
+            onSelectDate = onSelectDate
+        )
 
-        CalendarLanguage.Persian  ->
-            PersianMonthGrid(state, disabledDays, style, onDayClick)
+        CalendarLanguage.Persian -> PersianMonthGrid(
+            year = year,
+            month = month,
+            disabledDays = disabledDays,
+            style = style,
+            selectedDate = selectedDate,
+            onSelectDate = onSelectDate
+        )
     }
 }
 
 @Composable
 private fun GregorianMonthGrid(
-    state: DashwoodCalendarState,
+    year: Int,
+    month: Int,
     disabledDays: List<LocalDate>,
     style: DashwoodCalendarStyle,
-    onDayClick: (DashwoodDay) -> Unit
+    selectedDate: LocalDate?,
+    onSelectDate: (LocalDate, CalendarModel) -> Unit
 ) {
-    val year = state.currentYear
-    val month = state.currentMonth
-
     val firstDayOfMonth = LocalDate(year, month, 1)
     val daysInMonth = daysInMonthGregorian(year, month)
     val firstDayOfWeekIndex = firstDayOfMonth.dayOfWeek.toGregorianIndex()
     val today = JalaliUtils.todayGregorian()
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(Modifier.fillMaxWidth()) {
         var dayCounter = 1
         val totalCells = ((firstDayOfWeekIndex + daysInMonth + 6) / 7) * 7
 
@@ -221,7 +341,7 @@ private fun GregorianMonthGrid(
                         val date = LocalDate(year, month, dayCounter)
                         val isToday = date == today
                         val iso = date.dayOfWeek.isoDayNumber
-                        val isWeekend = iso == 6 || iso == 7        // Sat/Sun
+                        val isWeekend = iso == 6 || iso == 7   // Sat/Sun
                         val isDisabled = disabledDays.contains(date) ||
                                 (style.disableWeekend && isWeekend)
 
@@ -236,11 +356,10 @@ private fun GregorianMonthGrid(
                         DayCell(
                             day = dashwoodDay,
                             style = style,
-                            isSelected = state.selectedDate == date,
+                            isSelected = (selectedDate == date),
                             onClick = {
                                 if (!isDisabled) {
-                                    state.onDateSelected(date)
-                                    onDayClick(dashwoodDay)
+                                    onSelectDate(date, dashwoodDay)
                                 }
                             },
                             modifier = Modifier.weight(1f)
@@ -255,19 +374,18 @@ private fun GregorianMonthGrid(
 
 @Composable
 private fun PersianMonthGrid(
-    state: DashwoodCalendarState,
+    year: Int,                         // Jalali year
+    month: Int,                        // Jalali month
     disabledDays: List<LocalDate>,
     style: DashwoodCalendarStyle,
-    onDayClick: (DashwoodDay) -> Unit
+    selectedDate: LocalDate?,
+    onSelectDate: (LocalDate, CalendarModel) -> Unit
 ) {
-    val year = state.currentYear       // Jalali
-    val month = state.currentMonth     // Jalali
-
     val daysInMonth = JalaliUtils.jalaliMonthLength(year, month)
     val firstDayIndex = JalaliUtils.jalaliFirstDayColumnIndex(year, month)
     val todayG = JalaliUtils.todayGregorian()
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(Modifier.fillMaxWidth()) {
         var dayCounter = 1
         val totalCells = ((firstDayIndex + daysInMonth + 6) / 7) * 7
 
@@ -285,7 +403,8 @@ private fun PersianMonthGrid(
                                 .height(style.dayHeight)
                         )
                     } else {
-                        val gregDate = JalaliUtils.jalaliToGregorian(year, month, dayCounter)
+                        val gregDate =
+                            JalaliUtils.jalaliToGregorian(year, month, dayCounter)
                         val isToday = gregDate == todayG
                         val iso = gregDate.dayOfWeek.isoDayNumber
                         val isWeekend = iso == 5 || iso == 6   // Fri & Sat
@@ -303,11 +422,10 @@ private fun PersianMonthGrid(
                         DayCell(
                             day = dashwoodDay,
                             style = style,
-                            isSelected = state.selectedDate == gregDate,
+                            isSelected = (selectedDate == gregDate),
                             onClick = {
                                 if (!isDisabled) {
-                                    state.onDateSelected(gregDate)
-                                    onDayClick(dashwoodDay)
+                                    onSelectDate(gregDate, dashwoodDay)
                                 }
                             },
                             modifier = Modifier.weight(1f)
@@ -322,7 +440,7 @@ private fun PersianMonthGrid(
 
 @Composable
 private fun DayCell(
-    day: DashwoodDay,
+    day: CalendarModel,
     style: DashwoodCalendarStyle,
     isSelected: Boolean,
     onClick: () -> Unit,
@@ -362,14 +480,104 @@ private fun DayCell(
     ) {
         Text(
             text = day.day.toString(),
-            fontSize = style.textSizeDay.sp,
+            fontSize = style.textSizeDaySp.sp,
             fontWeight = if (day.isToday) FontWeight.Bold else FontWeight.Normal,
             color = textColor
         )
     }
 }
 
-/* Helpers */
+/* -------------------- Year / Month pickers -------------------- */
+
+@Composable
+private fun YearPickerDialog(
+    currentYear: Int,
+    minYear: Int,
+    maxYear: Int,
+    style: DashwoodCalendarStyle,
+    onDismiss: () -> Unit,
+    onYearSelected: (Int) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {},
+        title = {
+            Text(text = "انتخاب سال")
+        },
+        text = {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 300.dp)
+            ) {
+                items((minYear..maxYear).toList()) { year ->
+                    val isSelected = year == currentYear
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onYearSelected(year) }
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = year.toString(),
+                            fontSize = style.textSizeMonthYearListSp.sp,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                        )
+                    }
+                }
+            }
+        }
+    )
+}
+
+@Composable
+private fun MonthPickerDialog(
+    language: CalendarLanguage,
+    currentYear: Int,
+    currentMonth: Int,
+    style: DashwoodCalendarStyle,
+    onDismiss: () -> Unit,
+    onMonthSelected: (Int) -> Unit
+) {
+    val months = (1..12).map { month ->
+        month to monthName(currentYear, month, language)
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {},
+        title = {
+            Text(text = if (language == CalendarLanguage.Persian) "انتخاب ماه" else "Select month")
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 300.dp)
+            ) {
+                months.forEach { (m, label) ->
+                    val isSelected = (m == currentMonth)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onMonthSelected(m) }
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = label,
+                            fontSize = style.textSizeMonthYearListSp.sp,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                        )
+                    }
+                }
+            }
+        }
+    )
+}
+
+/* -------------------- Helpers -------------------- */
 
 private fun DayOfWeek.toGregorianIndex(): Int = when (this) {
     DayOfWeek.SUNDAY -> 0
@@ -411,7 +619,6 @@ private fun monthName(
             Month(month).name.lowercase().replaceFirstChar { it.titlecase() }
         }
         CalendarLanguage.Persian -> {
-            // Use Jalali month string from JalaliCalendar
             val jalali = ir.huri.jcal.JalaliCalendar(year, month, 1)
             jalali.monthString
         }
@@ -419,12 +626,12 @@ private fun monthName(
 }
 
 private fun buildDashwoodDay(
-    date: LocalDate,                 // always Gregorian
+    date: LocalDate,                 // ALWAYS Gregorian date
     language: CalendarLanguage,
     isToday: Boolean,
     isDisabled: Boolean,
     isWeekend: Boolean
-): DashwoodDay {
+): CalendarModel {
 
     val iso = date.dayOfWeek.isoDayNumber
 
@@ -467,15 +674,14 @@ private fun buildDashwoodDay(
 
             CalendarLanguage.Persian -> {
                 val gregStr = "%04d-%02d-%02d".format(date.year, date.monthNumber, date.dayOfMonth)
-                val persianDate = com.dashwood.dashwoodcalendar.handler.DateConverter.gregorianToPersian(gregStr)
+                val persianDate = DateConverter.gregorianToPersian(gregStr)
                 val parts = persianDate.split("-")
                 val py = parts.getOrNull(0)?.toIntOrNull() ?: date.year
                 val pm = parts.getOrNull(1)?.toIntOrNull() ?: date.monthNumber
                 val pd = parts.getOrNull(2)?.toIntOrNull() ?: date.dayOfMonth
 
                 val withMonthName =
-                    com.dashwood.dashwoodcalendar.handler.DateConverter
-                        .gregorianToPersianWithMonthStringName(gregStr) // "dd Month yyyy"
+                    DateConverter.gregorianToPersianWithMonthStringName(gregStr)
                 val tokens = withMonthName.split(" ")
                 val mName = tokens.getOrNull(1) ?: ""
 
@@ -492,7 +698,7 @@ private fun buildDashwoodDay(
             }
         }
 
-    return DashwoodDay(
+    return CalendarModel(
         day = day,
         month = month,
         year = year,
