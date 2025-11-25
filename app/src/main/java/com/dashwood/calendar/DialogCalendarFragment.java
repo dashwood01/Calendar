@@ -1,21 +1,22 @@
 package com.dashwood.calendar;
 
 import android.app.Dialog;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.compose.ui.platform.ComposeView;
 import androidx.fragment.app.DialogFragment;
 
 import com.dashwood.calendar.databinding.FragmentDialogCalendarBinding;
-import com.dashwood.dashwoodcalendar.DashwoodCalendar;
+import com.dashwood.dashwoodcalendar.DashwoodCalendarKt;
+import com.dashwood.dashwoodcalendar.handler.CalendarLanguage;
+import com.dashwood.dashwoodcalendar.handler.DashwoodCalendarStyle;
+import com.dashwood.dashwoodcalendar.handler.DashwoodYear;
 
 public class DialogCalendarFragment extends DialogFragment {
 
@@ -29,15 +30,12 @@ public class DialogCalendarFragment extends DialogFragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(
+            @NonNull View view,
+            @Nullable Bundle savedInstanceState
+    ) {
         super.onViewCreated(view, savedInstanceState);
-        DashwoodCalendar dashwoodCalendar = new DashwoodCalendar(requireActivity(),
-                fragmentDialogCalendarBinding.viewPager, 1300, 1500, DashwoodCalendar.PERSIAN_LANGUAGE);
-        dashwoodCalendar.setOnClickCalendarListener((day, month, year, monthName, dayOfWeek, dayOfWeekNumber, fullDateWithMonthString, fullDate, gregorianDate) -> {
-            Toast.makeText(requireContext(), "Day : " + day + "\nMonth : " + month + "\nyear : " + year + "\nmonthName : " + monthName + "\nday of week : " + dayOfWeek + "\nday of week number : " + dayOfWeekNumber +
-                    "\nfull date with month string : " + fullDateWithMonthString + "\nfull date : " + fullDate + "\ngregorian date : " + gregorianDate, Toast.LENGTH_LONG).show();
-        });
-        dashwoodCalendar.init();
+
     }
 
     // for full screen horizontal dialog
