@@ -551,12 +551,12 @@ private fun MonthPickerDialog(
             Text(text = if (language == CalendarLanguage.Persian) "انتخاب ماه" else "Select month")
         },
         text = {
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = 300.dp)
             ) {
-                months.forEach { (m, label) ->
+                items(items = months) { (m, label) ->
                     val isSelected = (m == currentMonth)
                     Row(
                         modifier = Modifier
@@ -572,6 +572,10 @@ private fun MonthPickerDialog(
                         )
                     }
                 }
+
+                /*months.forEach { (m, label) ->
+
+                }*/
             }
         }
     )
@@ -618,6 +622,7 @@ private fun monthName(
         CalendarLanguage.Gregorian -> {
             Month(month).name.lowercase().replaceFirstChar { it.titlecase() }
         }
+
         CalendarLanguage.Persian -> {
             val jalali = ir.huri.jcal.JalaliCalendar(year, month, 1)
             jalali.monthString
@@ -648,6 +653,7 @@ private fun buildDashwoodDay(
                 else -> ""
             }
         }
+
         CalendarLanguage.Gregorian -> {
             date.dayOfWeek.name.lowercase().replaceFirstChar { it.titlecase() }
         }
