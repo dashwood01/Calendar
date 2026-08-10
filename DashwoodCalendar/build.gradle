@@ -3,7 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 
     // Compose Compiler — REQUIRED for Kotlin 2.0+
-    id 'org.jetbrains.kotlin.plugin.compose' version '2.0.0'
+    id 'org.jetbrains.kotlin.plugin.compose' version '2.2.10'
     id 'maven-publish'
 }
 
@@ -14,10 +14,7 @@ android {
 
     defaultConfig {
         minSdk 21
-        targetSdk 36
         consumerProguardFiles 'consumer-rules.pro'
-        versionCode 1
-        versionName "2.4.1"
     }
 
     buildFeatures {
@@ -34,6 +31,12 @@ android {
     }
     kotlin {
         jvmToolchain(17)
+    }
+    lint {
+        targetSdk 36
+    }
+    testOptions {
+        targetSdk 36
     }
 }
 

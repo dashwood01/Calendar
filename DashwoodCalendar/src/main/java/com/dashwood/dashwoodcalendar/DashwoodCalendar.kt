@@ -34,6 +34,7 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
 import kotlinx.datetime.isoDayNumber
+import kotlinx.datetime.number
 
 @Composable
 fun DashwoodCalendar(
@@ -630,6 +631,7 @@ private fun monthName(
     }
 }
 
+
 private fun buildDashwoodDay(
     date: LocalDate,                 // ALWAYS Gregorian date
     language: CalendarLanguage,
@@ -655,7 +657,8 @@ private fun buildDashwoodDay(
         }
 
         CalendarLanguage.Gregorian -> {
-            date.dayOfWeek.name.lowercase().replaceFirstChar { it.titlecase() }
+            date.dayOfWeek.name.lowercase()
+                .replaceFirstChar { it.titlecase() }
         }
     }
 
@@ -663,43 +666,56 @@ private fun buildDashwoodDay(
 
     val (year, month, day, monthName, fullDateWithMonthStr, fullDate) =
         when (language) {
+
             CalendarLanguage.Gregorian -> {
-                val mName = Month(date.monthNumber).name
-                    .lowercase().replaceFirstChar { it.titlecase() }
-                val fWithMonth = "${date.dayOfMonth} $mName ${date.year}"
-                val f = "%04d/%02d/%02d".format(date.year, date.monthNumber, date.dayOfMonth)
+
+                val mName = date.month.name
+                    .lowercase()
+                    .replaceFirstChar { it.titlecase() }
+
                 Sextuple(
                     date.year,
-                    date.monthNumber,
-                    date.dayOfMonth,
+                    date.month.number,
+                    date.day,
                     mName,
-                    fWithMonth,
-                    f
+                    "%02d %s %04d".format(date.day, mName, date.year),
+                    "%04d/%02d/%02d".format(
+                        date.year,
+                        date.month.number,
+                        date.day
+                    )
                 )
             }
 
             CalendarLanguage.Persian -> {
-                val gregStr = "%04d-%02d-%02d".format(date.year, date.monthNumber, date.dayOfMonth)
-                val persianDate = DateConverter.gregorianToPersian(gregStr)
-                val parts = persianDate.split("-")
-                val py = parts.getOrNull(0)?.toIntOrNull() ?: date.year
-                val pm = parts.getOrNull(1)?.toIntOrNull() ?: date.monthNumber
-                val pd = parts.getOrNull(2)?.toIntOrNull() ?: date.dayOfMonth
 
-                val withMonthName =
+                val gregStr = "%04d-%02d-%02d".format(
+                    date.year,
+                    date.month.number,
+                    date.day
+                )
+
+                val persian = DateConverter.gregorianToPersian(gregStr)
+                    .split("-")
+
+                val py = persian.getOrNull(0)?.toIntOrNull() ?: date.year
+                val pm = persian.getOrNull(1)?.toIntOrNull() ?: date.month.number
+                val pd = persian.getOrNull(2)?.toIntOrNull() ?: date.day
+
+                val monthString =
                     DateConverter.gregorianToPersianWithMonthStringName(gregStr)
-                val tokens = withMonthName.split(" ")
-                val mName = tokens.getOrNull(1) ?: ""
 
-                val f = "%04d/%02d/%02d".format(py, pm, pd)
+                val mName = monthString.split(" ")
+                    .getOrNull(1)
+                    .orEmpty()
 
                 Sextuple(
                     py,
                     pm,
                     pd,
                     mName,
-                    withMonthName,
-                    f
+                    "%02d %s %04d".format(pd, mName, py),
+                    "%04d/%02d/%02d".format(py, pm, pd)
                 )
             }
         }
